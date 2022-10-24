@@ -1,92 +1,95 @@
 import mysql.connector
 from mysql.connector import errorcode
+from flask_bcrypt import generate_password_hash
 
 print("Conectando...")
+conn = None
 try:
     conn = mysql.connector.connect(
         host='127.0.0.1',
         user='root',
-        password=''
+        password='pedrogh0st3112'
     )
-    cursor = conn.cursor()
-
-    cursor.execute("DROP DATABASE IF EXISTS 'jogateca_v1';")
-
-    cursor.execute("CREATE DATABASE 'jogateca_v1';")
-
-    cursor.execute("USE `jogateca_v1`;")
-
-    # criando tabelas
-    tables = {}
-    tables['Games'] = ('''
-          create table 'games' (
-          'id' int(11) not null auto_increment
-          'nome' varchar(50) not null,
-          'categoria' varchar(40) not null,
-          'console' varchar(20) not null,
-          primary key ('id')
-          ) engine=InnoDB default CHARSET=utf8 collate=utf8_bin;''')
-
-    tables['users'] = ('''
-          create table `users` (
-          `name` varchar(20) NOT NULL,
-          `nickname` varchar(8) NOT NULL,
-          `password` varchar(100) NOT NULL,
-          PRIMARY KEY (`nickname`)
-          ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;''')
-
-    for table_name in tables:
-        table_sql = tables[table_name]
-        try:
-            print('Criando tabela {}:'.format(table_name), end=' ')
-            cursor.execute(table_sql)
-        except mysql.connector.Error as err:
-            if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
-                print('Já existe')
-            else:
-                print(err.msg)
-        else:
-            print('OK')
-
-    # inserindo usuarios
-    user_sql = 'INSERT INTO users (name, nickname, password) VALUES (%s, %s, %s)'
-    users = [
-        ("Pedro Miranda", "saitiay", "password"),
-        ("Isabelli", "isaa_justi", "isa123"),
-        ("Vitor Kato", "kami", "kami123"),
-        ("Caio Precioso", "Caiudo", "caio123")
-    ]
-    cursor.executemany(user_sql, users)
-
-    cursor.execute('select * from jogateca_v1.users')
-    print(' -------------  usuarios:  -------------')
-    for user in cursor.fetchall():
-        print(user[1])
-
-    # inserindo jogos
-    games_sql = 'INSERT INTO games (name, category, console) VALUES (%s, %s, %s)'
-    games = [
-        ('Tetris', 'Puzzle', 'Atari'),
-        ('God of War', 'Hack n Slash', 'PS2'),
-        ('Mortal Kombat', 'Luta', 'PS2'),
-        ('Valorant', 'FPS', 'PC'),
-        ('Crash Bandicoot', 'Hack n Slash', 'PS2'),
-        ('Need for Speed', 'Corrida', 'PS2'),
-    ]
-    cursor.executemany(games_sql, games)
-
-    cursor.execute('select * from jogateca_v1.games')
-    print(' -------------  Jogos:  -------------')
-    for game in cursor.fetchall():
-        print(game[1])
-
-    # commitando se não nada tem efeito
-    conn.commit()
-
-    cursor.close()
-    conn.close()
 except mysql.connector.Error as err:
     if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
         print('Existe algo errado no nome de usuário ou senha')
     else:
         print(err)
+
+cursor = conn.cursor()
+
+cursor.execute("DROP DATABASE IF EXISTS `jogoteca`;")
+
+cursor.execute("CREATE DATABASE `jogoteca`;")
+
+cursor.execute("USE `jogoteca`;")
+
+# criando tabelas
+tables = {}
+tables['Jogos'] = ('''
+      CREATE TABLE `jogos` (
+      `id` int(11) NOT NULL AUTO_INCREMENT,
+      `nome` varchar(50) NOT NULL,
+      `categoria` varchar(40) NOT NULL,
+      `console` varchar(20) NOT NULL,
+      PRIMARY KEY (`id`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;''')
+
+tables['Usuarios'] = ('''
+      CREATE TABLE `usuarios` (
+      `nome` varchar(20) NOT NULL,
+      `nickname` varchar(8) NOT NULL,
+      `senha` varchar(100) NOT NULL,
+      primary key (`nickname`)
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;''')
+
+for table_name in tables:
+    table_sql = tables[table_name]
+    try:
+        print('Criando tabela {}:'.format(table_name), end=' ')
+        cursor.execute(table_sql)
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
+            print('Já existe')
+        else:
+            print(err.msg)
+    else:
+        print('OK')
+
+# inserindo usuarios
+usuario_sql = 'INSERT INTO usuarios (nome, nickname, senha) VALUES (%s, %s, %s)'
+usuarios = [
+    ("Pedro Miranda", "saitiay", generate_password_hash("amoisa").decode('utf-8')),
+    ("Isa Justi", "isaa", generate_password_hash("amopeu").decode('utf-8')),
+    ("Vitor Akio", "Kami", generate_password_hash("salada").decode('utf-8')),
+    ("Caio Precioso", "Caioba",generate_password_hash("caiudo").decode('utf-8'))
+    ]
+cursor.executemany(usuario_sql, usuarios)
+
+cursor.execute('select * from jogoteca.usuarios')
+print(' -------------  Usuários:  -------------')
+for usuarios in cursor.fetchall():
+    print(usuarios[1])
+
+# inserindo jogos
+jogos_sql = 'INSERT INTO jogos (nome, categoria, console) VALUES (%s, %s, %s)'
+jogos = [
+    ('Tetris', 'Puzzle', 'Atari'),
+    ('God of War', 'Hack n Slash', 'PS2'),
+    ('Mortal Kombat', 'Luta', 'PS2'),
+    ('Valorant', 'FPS', 'PC'),
+    ('Crash Bandicoot', 'Hack n Slash', 'PS2'),
+    ('Need for Speed', 'Running', 'PS2'),
+]
+cursor.executemany(jogos_sql, jogos)
+
+cursor.execute('select * from jogoteca.jogos')
+print(' -------------  Jogos:  -------------')
+for jogo in cursor.fetchall():
+    print(jogo[1])
+
+# commitando se não nada tem efeito
+conn.commit()
+
+cursor.close()
+conn.close()

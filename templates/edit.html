@@ -1,9 +1,9 @@
 {% extends'template.html' %}
 {% block content %}
-      <form class="formularioJogo"action="{{ url_for('create') }}" method="post" enctype="multipart/form-data">
+      <form class="formularioJogo" action="{{ url_for('atualizar') }}" method="post" enctype="multipart/form-data">
 
-        <figure class="img-thumbnail col-md-4 formularioImagem">
-           <img class="img-fluid" src="{{ url_for('image', archive_name='capa_padrao.jpg') }}" >
+       <figure class="img-thumbnail col-md-4 formularioImagem">
+           <img class="img-fluid" src="{{ url_for('image', archive_name=jogo_capa) }}" >
            <figcaption>
              <label class="fileContainer">
                     Mudar Capa
@@ -11,8 +11,10 @@
                 </label>
             </figcaption>
         </figure>
+
         <fieldset>
-          {{ form.csrf_token() }}
+            <input type="hidden" name="id" value="{{ id }}">
+            {{ form.csrf_token() }}
           <div class="form-group inputBox">
               {{ form.nome.label(class="form-label") }}
               {{ form.nome(class="form-control") }}
@@ -25,10 +27,11 @@
               {{ form.console.label(class="form-label") }}
               {{ form.console(class="form-control") }}
           </div>
-          <div class="form-group buttons">
-                {{ form.salvar(class="btn btn-primary") }}
-                <a class="btn btn-danger" href="{{ url_for('index') }}">Voltar</a>
-            </div>
+          <div class="form-group Buttons">
+            {{ form.salvar(class="btn btn-primary") }}
+            <a class="btn btn-danger" href="{{ url_for('index') }}">Voltar</a>
+          </div>
+
         </fieldset>
       </form>
 {% endblock %}
