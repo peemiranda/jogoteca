@@ -20,7 +20,7 @@
         {% endwith %}
         <h1>Faça seu login</h1>
         <form method="POST" action="{{ url_for('authenticate') }}">
-            <input type="hidden" name="next" value="{{ next }}">
+            <input type="hidden" name="next" value="{{ next or url_for("index") }}">
             {{ form.csrf_token() }}
             <div class="form-group">
                 {{ form.nickname.label(class="form-label") }}

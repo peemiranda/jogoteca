@@ -15,10 +15,8 @@ def login():
 @app.route('/autenticar', methods=['POST', ])
 def authenticate():
     form = FormularioUsario(request.form)
-
     usuario = Usuarios.query.filter_by(nickname=form.nickname.data).first()
     senha = check_password_hash(usuario.senha, form.senha.data)
-
     if usuario and senha:
         session['logged_in_user'] = usuario.nickname
         flash(usuario.nickname + ' logado com sucesso!')
